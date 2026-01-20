@@ -40,21 +40,58 @@ class ModelTrainer:
                 
             )
             
-            models={
-                "Random Forest":RandomForestRegressor(),
-                "Decision Tree":DecisionTreeRegressor(),
-                "Gradient Boosting":GradientBoostingRegressor(),
-                "Linear Regression":LinearRegression(),
-                "K-Neighbors Classifier":KNeighborsRegressor(),
-                "XGBClassifier":XGBRegressor(),
-                "CatBoosting Classifier":CatBoostRegressor(verbose=False),
-                "AdaBoost Classifier":AdaBoostRegressor(),
-                
-                
+            models = {
+                "RandomForest": RandomForestRegressor(),
+                "DecisionTree": DecisionTreeRegressor(),
+                "GradientBoosting": GradientBoostingRegressor(),
+                "LinearRegression": LinearRegression(),
+                "KNN": KNeighborsRegressor(),
+                "XGBRegressor": XGBRegressor(),
+                "CatBoostRegressor": CatBoostRegressor(verbose=False),
+                "AdaBoostRegressor": AdaBoostRegressor(),
             }
             
-            model_report:dict=evaluate_models(X_train=X_train,y_train=y_train,X_test=X_test,y_test=y_test,
-                                               models=models)
+            
+            params = {
+                "DecisionTree": {
+                    "criterion": ["squared_error", "friedman_mse", "absolute_error", "poisson"]
+                },
+
+                "RandomForest": {
+                    "n_estimators": [50, 100, 200]
+                },
+
+                "GradientBoosting": {
+                    "learning_rate": [0.1, 0.01, 0.05],
+                    "n_estimators": [50, 100]
+                },
+
+                "LinearRegression": {},
+
+                "KNN": {
+                    "n_neighbors": [5, 7, 9, 11]
+                },
+
+                "XGBRegressor": {
+                    "learning_rate": [0.1, 0.01],
+                    "n_estimators": [50, 100]
+                },
+
+                "CatBoostRegressor": {
+                    "depth": [6, 8, 10],
+                    "learning_rate": [0.1, 0.01],
+                    "iterations": [50, 100]
+                },
+
+                "AdaBoostRegressor": {
+                    "learning_rate": [0.1, 0.01],
+                    "n_estimators": [50, 100]
+                }
+            }
+
+            
+            model_report,trained_models=evaluate_models(X_train=X_train,y_train=y_train,X_test=X_test,y_test=y_test,
+                                               models=models,param=params)
             
             ##To get the best model score from dict
             best_model_score=max(sorted(model_report.values()))
@@ -65,7 +102,7 @@ class ModelTrainer:
                 list(model_report.values()).index(best_model_score)
             ]
             
-            best_model=models[best_model_name]
+            best_model=trained_models[best_model_name]
             
             if best_model_score<0.6:
                 raise CustomException("No best model found")
